@@ -1,50 +1,57 @@
 let pokemons;
 
 function createPokemon(pokemon) {
+    while (String(pokemon.id).length < 4) {
+        pokemon.id = "0" + pokemon.id;
+    }
+    pokemon.name = pokemon.name.replace(pokemon.name.charAt(0), pokemon.name.charAt(0).toUpperCase());
+
     const pokemonDiv = document.createElement("div");
     pokemonDiv.setAttribute("class", "pokemon");
     
-    const pokemonIcon = document.createElement("div");
-    pokemonIcon.setAttribute("class", `pokemon-icon ${pokemon.types[0].type.name}`);
+    const iconDiv = document.createElement("div");
+    iconDiv.setAttribute("class", `pokemon-icon ${pokemon.types[0].type.name}`);
     
-    const pokemonBackground = document.createElement("img");
-    pokemonBackground.setAttribute("src", "assets/images/pokebola2.png")
-    pokemonBackground.setAttribute("class", "pokemon-background");
+    const backgroundImg = document.createElement("img");
+    backgroundImg.setAttribute("src", "assets/images/pokebola2.png")
+    backgroundImg.setAttribute("class", "pokemon-background");
     
     const pokemonImg = document.createElement("img");
     pokemonImg.setAttribute("src", pokemon.sprites.other["official-artwork"].front_default);
     pokemonImg.setAttribute("class", "sprite");
     
-    const pokemonNumber = document.createElement("div");
-    pokemonNumber.innerHTML = `N° ${pokemon.id}`;
-    pokemonNumber.setAttribute("class", "number");
+    const numberDiv = document.createElement("div");
+    numberDiv.innerHTML = `N° ${pokemon.id}`;
+    numberDiv.setAttribute("class", "number");
     
-    pokemonIcon.appendChild(pokemonBackground);
-    pokemonIcon.appendChild(pokemonImg);
-    pokemonIcon.appendChild(pokemonNumber);
-    pokemonDiv.appendChild(pokemonIcon)
+    iconDiv.appendChild(backgroundImg);
+    iconDiv.appendChild(pokemonImg);
+    iconDiv.appendChild(numberDiv);
+    pokemonDiv.appendChild(iconDiv)
     
-    const pokemonDescription = document.createElement("div");
-    pokemonDescription.setAttribute("class", "pokemon-description");
+    const descriptionDiv = document.createElement("div");
+    descriptionDiv.setAttribute("class", "pokemon-description");
     
-    const types = document.createElement("types");
-    types.setAttribute("class", "types");
+    const typesDiv = document.createElement("types");
+    typesDiv.setAttribute("class", "types");
     
     for (let x of pokemon.types) {
-        const type = document.createElement("div");
-        type.setAttribute("class", `type ${x.type.name}`);
-        type.innerHTML = x.type.name;
-        types.appendChild(type);
+        let type = x.type.name;
+        const typeDiv = document.createElement("div");
+        typeDiv.setAttribute("class", `type ${type}`);
+        type = type.replace(type.charAt(0), type.charAt(0).toUpperCase());
+        typeDiv.innerHTML = type;
+        typesDiv.appendChild(typeDiv);
     }
     
-    const pokeName = document.createElement("div")
-    pokeName.setAttribute("class", "name");
-    pokeName.innerHTML = pokemon.name
+    const nameDiv = document.createElement("div")
+    nameDiv.setAttribute("class", "name");
+    nameDiv.innerHTML = pokemon.name
     
-    pokemonDescription.appendChild(types);
-    pokemonDescription.appendChild(pokeName)
+    descriptionDiv.appendChild(typesDiv);
+    descriptionDiv.appendChild(nameDiv)
     
-    pokemonDiv.appendChild(pokemonDescription);
+    pokemonDiv.appendChild(descriptionDiv);
     document.getElementsByClassName("pokemons-list")[0].appendChild(pokemonDiv);
 }
 
@@ -65,14 +72,13 @@ function request(url) {
 async function generatePokes() {
     try {
         if (pokemons === undefined) {
-            pokemons = await request("https://pokeapi.co/api/v2/pokemon");
+            pokemons = await request("https://pokeapi.co/api/v2/pokemon?limit=12&offset=0");
         } else {
             pokemons = await request(pokemons.next);
         }
         for (let pokemon of pokemons.results) {
             createPokemon(await request(pokemon.url));
         }
-        console.log(pokemons)
     } catch(error) {
         console.log(error)
     }
