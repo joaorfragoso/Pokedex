@@ -69,31 +69,43 @@ function request(url) {
     }))
 }
 
-//Function Closures
-const generatePokes = (function() {
-    let running = false;
-    return async function() {
-        if (running) {return}
-        running = true;
-        try {
-            if (pokemons === undefined) {
-                pokemons = await request("https://pokeapi.co/api/v2/pokemon?limit=12&offset=0");
-            } else {
-                pokemons = await request(pokemons.next);
-            }
-            for (let pokemon of pokemons.results) {
-                createPokemon(await request(pokemon.url));
-            }
-        } catch(error) {
-            console.log(error)
-        }
-        running = false;
-    }
-})();
+const urlParameters = new URLSearchParams(window.location.search);
+const searchedPoke = urlParameters.get("pokemon");
 
-generatePokes()
-window.onscroll = function(){
-    if (document.documentElement.scrollHeight === (window.scrollY + window.innerHeight)) {
-        generatePokes();
+if (searchedPoke != '') {
+    document.getElementById("search-input").value = searchedPoke;
+    try {
+        request(`https://pokeapi.co/api/v2/pokemon/${searchedPoke.toLowerCase()}`).then((poke) => createPokemon(poke))
+    } catch(error) {
+        console.log(error);
     }
-};
+} else {
+    //Function Closures
+    const generatePokes = (function() {
+        let running = false;
+        return async function() {
+            if (running) {return}
+            running = true;
+            try {
+                if (pokemons === undefined) {
+                    pokemons = await request("https://pokeapi.co/api/v2/pokemon?limit=12&offset=0");
+                } else {
+                    pokemons = await request(pokemons.next);
+                }
+                for (let pokemon of pokemons.results) {
+                    createPokemon(await request(pokemon.url));
+                }
+            } catch(error) {
+                console.log(error);
+            }
+            running = false;
+        }
+    })();
+
+    generatePokes()
+    window.onscroll = function(){
+        if (document.documentElement.scrollHeight === (window.scrollY + window.innerHeight)) {
+            generatePokes();
+        }
+    };
+}
