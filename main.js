@@ -72,7 +72,7 @@ function request(url) {
 const urlParameters = new URLSearchParams(window.location.search);
 const searchedPoke = urlParameters.get("pokemon");
 
-if (searchedPoke != '') {
+if (searchedPoke != '' && typeof searchedPoke == 'string') {
     document.getElementById("search-input").value = searchedPoke;
     try {
         request(`https://pokeapi.co/api/v2/pokemon/${searchedPoke.toLowerCase()}`).then((poke) => createPokemon(poke))
@@ -104,7 +104,7 @@ if (searchedPoke != '') {
 
     generatePokes()
     window.onscroll = function(){
-        if (document.documentElement.scrollHeight === (window.scrollY + window.innerHeight)) {
+        if (document.documentElement.scrollHeight-100 < (window.scrollY + window.innerHeight)) {
             generatePokes();
         }
     };
