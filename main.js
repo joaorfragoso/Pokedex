@@ -69,19 +69,31 @@ function request(url) {
     }))
 }
 
-async function generatePokes() {
-    try {
-        if (pokemons === undefined) {
-            pokemons = await request("https://pokeapi.co/api/v2/pokemon?limit=12&offset=0");
-        } else {
-            pokemons = await request(pokemons.next);
+//Function Closures
+const generatePokes = (function() {
+    let running = false;
+    return async function() {
+        if (running) {return}
+        running = true;
+        try {
+            if (pokemons === undefined) {
+                pokemons = await request("https://pokeapi.co/api/v2/pokemon?limit=12&offset=0");
+            } else {
+                pokemons = await request(pokemons.next);
+            }
+            for (let pokemon of pokemons.results) {
+                createPokemon(await request(pokemon.url));
+            }
+        } catch(error) {
+            console.log(error)
         }
-        for (let pokemon of pokemons.results) {
-            createPokemon(await request(pokemon.url));
-        }
-    } catch(error) {
-        console.log(error)
+        running = false;
     }
-}
+})();
 
 generatePokes()
+window.onscroll = function(){
+    if (document.documentElement.scrollHeight === (window.scrollY + window.innerHeight)) {
+        generatePokes();
+    }
+};
